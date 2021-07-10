@@ -49,8 +49,8 @@ def match_keypoints(descriptors1: np.ndarray, descriptors2: np.ndarray, distance
     return matches
 
 
-def match_all_images(descriptors: List[np.ndarray], distance_threthold: float, ratio_threthold: float, cross_check: bool = False):
-    all_matches = []
+def match_all_images(descriptors: List[np.ndarray], distance_threthold: float, ratio_threthold: float, cross_check: bool = False) -> List[Dict[Tuple[int, int], float]]:
+    all_matches: List[Dict[Tuple[int, int], float]] = []
 
     for i, descriptor in enumerate(descriptors):
         if i == 0:
@@ -71,7 +71,7 @@ def match_all_images(descriptors: List[np.ndarray], distance_threthold: float, r
     return all_matches
 
 
-def calc_homography(keypoints, matches):
+def calc_homography(keypoints: List[cv2.KeyPoint], matches: List[Dict[Tuple[int, int], float]]) -> np.ndarray:
     homographies = np.empty((0, 8))
 
     for i, match in enumerate(matches):
