@@ -72,7 +72,7 @@ def match_all_images(descriptors: List[np.ndarray], distance_threthold: float, r
 
 
 def calc_homography(keypoints: List[cv2.KeyPoint], matches: List[Dict[Tuple[int, int], float]]) -> np.ndarray:
-    homographies = np.empty((0, 8))
+    homographies = np.empty((0, 9))
 
     for i, match in enumerate(matches):
         coefficient = np.empty((0, 8))
@@ -92,6 +92,7 @@ def calc_homography(keypoints: List[cv2.KeyPoint], matches: List[Dict[Tuple[int,
             coefficient = np.vstack((coefficient, coefficient_tmp))
 
         homography = np.linalg.pinv(coefficient) @ destination
+        homography = np.hstack((homography, 1))
         homographies = np.vstack((homographies, homography))
 
     return homographies
