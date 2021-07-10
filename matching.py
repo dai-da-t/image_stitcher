@@ -63,7 +63,6 @@ def match_all_images(descriptors: List[np.ndarray], distance_threthold: float, r
 
             for index1, index2 in matches:
                 if (index2, index1) not in matches_inverse:
-                    print('pop')
                     tmp_matches.pop((index1, index2))
 
             matches = tmp_matches
