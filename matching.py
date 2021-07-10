@@ -75,7 +75,7 @@ def match_all_images(descriptors: List[np.ndarray], distance_threthold: float, r
 def main(args: argparse.Namespace) -> None:
     images = load_images(args.images)
     keypoints, descriptors = detect_keypoints(images)
-    match = match_all_images(descriptors, args.distance_threthold, args.ratio_threthold, args.cross_check)
+    matches = match_all_images(descriptors, args.distance_threthold, args.ratio_threthold, args.cross_check)
 
 
 if __name__ == '__main__':
