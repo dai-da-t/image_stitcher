@@ -71,10 +71,37 @@ def match_all_images(descriptors: List[np.ndarray], distance_threthold: float, r
     return all_matches
 
 
+def calc_homography(keypoints, matches):
+    homographies = np.empty((0, 8))
+
+    for i, match in enumerate(matches):
+        coefficient = np.empty((0, 8))
+        destination = np.empty((0))
+
+        for source_index, destination_index in match:
+            source_keypoint = keypoints[i + 1][source_index]
+            destination_keypoint = keypoints[i][destination_index]
+
+            destination = np.hstack((destination, destination_keypoint.pt))
+            source_x, source_y = source_keypoint.pt
+            destination_x, destination_y = destination_keypoint.pt
+            coefficient_tmp = np.array([
+                [source_x, source_y, 1, 0, 0, 0, -source_x * destination_x, -source_y * destination_x],
+                [0, 0, 0, source_x, source_y, 1, -source_x * destination_y, -source_y * destination_y]
+            ])
+            coefficient = np.vstack((coefficient, coefficient_tmp))
+
+        homography = np.linalg.pinv(coefficient) @ destination
+        homographies = np.vstack((homographies, homography))
+
+    return homographies
+
+
 def main(args: argparse.Namespace) -> None:
     images = load_images(args.images)
     keypoints, descriptors = detect_keypoints(images)
     matches = match_all_images(descriptors, args.distance_threthold, args.ratio_threthold, args.cross_check)
+    homographies = calc_homography(keypoints, matches)
 
 
 if __name__ == '__main__':
