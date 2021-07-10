@@ -16,10 +16,10 @@ def load_images(image_paths: List[str]) -> List[np.ndarray]:
     return images
 
 
-def detect_keypoints(images: List[np.ndarray]) -> Tuple[List, List]:
+def detect_keypoints(images: List[np.ndarray]) -> Tuple[List[List[cv2.KeyPoint]], List[np.ndarray]]:
     akaze = cv2.AKAZE_create()
-    keypoints = []
-    desctiptors = []
+    keypoints: List[List[cv2.KeyPoint]] = []
+    desctiptors: List[np.ndarray] = []
 
     for image in images:
         keypoint, desctiptor = akaze.detectAndCompute(image, mask=None)
