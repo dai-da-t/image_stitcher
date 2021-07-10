@@ -75,12 +75,17 @@ def match_all_images(descriptors: List[np.ndarray], distance_threthold: float, r
 def main(args: argparse.Namespace) -> None:
     images = load_images(args.images)
     keypoints, descriptors = detect_keypoints(images)
+    match = match_all_images(descriptors, args.distance_threthold, args.ratio_threthold, args.cross_check)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-i', '--images', help='input images', nargs='+', type=str, required=True)
+
+    parser.add_argument('-d', '--distance_threthold', help='threshold of L2 distance for matching', type=float, default=10)
+    parser.add_argument('-r', '--ratio_threthold', help='threshold of the ratio of the first to the second in matching', type=float, default=0.8)
+    parser.add_argument('-c', '--cross_check', action='store_true')
 
     args = parser.parse_args()
 
