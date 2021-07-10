@@ -1,5 +1,5 @@
 import argparse
-from typing import List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import cv2
 import numpy as np
@@ -27,6 +27,49 @@ def detect_keypoints(images: List[np.ndarray]) -> Tuple[List[List[cv2.KeyPoint]]
         desctiptors.append(desctiptor)
 
     return keypoints, desctiptors
+
+
+def match_keypoints(descriptors1: np.ndarray, descriptors2: np.ndarray, distance_threthold: float, ratio_threthold: float) -> Dict[Tuple[int, int], float]:
+    descriptors1 = descriptors1.astype(np.int64)
+    descriptors2 = descriptors2.astype(np.int64)
+    matches = {}
+
+    for i, anchor_descriptor in enumerate(descriptors1):
+        distances = np.linalg.norm(descriptors2 - anchor_descriptor, axis=1)
+        near_indices = np.argsort(distances)[:2]
+
+        first_distance = distances[near_indices[0]]
+        second_distance = distances[near_indices[1]]
+
+        if (distance_threthold <= first_distance or
+            ratio_threthold <= first_distance / second_distance):
+            continue
+
+        matches[(i, near_indices[0])] = first_distance
+    return matches
+
+
+def match_all_images(descriptors: List[np.ndarray], distance_threthold: float, ratio_threthold: float, cross_check: bool = False):
+    all_matches = []
+
+    for i, descriptor in enumerate(descriptors):
+        if i == 0:
+            continue
+
+        matches = match_keypoints(descriptor, descriptors[i-1], distance_threthold, ratio_threthold)
+        if cross_check:
+            tmp_matches = matches.copy()
+            matches_inverse = match_keypoints(descriptors[i-1], descriptor, distance_threthold, ratio_threthold)
+
+            for index1, index2 in matches:
+                if (index2, index1) not in matches_inverse:
+                    print('pop')
+                    tmp_matches.pop((index1, index2))
+
+            matches = tmp_matches
+
+        all_matches.append(matches)
+    return all_matches
 
 
 def main(args: argparse.Namespace) -> None:
