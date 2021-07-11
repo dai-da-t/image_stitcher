@@ -3,6 +3,7 @@ from typing import List, Optional, Tuple
 
 import cv2
 import numpy as np
+from tqdm import tqdm
 
 from src.homography import (
     calc_homography,
@@ -81,7 +82,7 @@ def stitch_images(
 
     images = images[::-1]
     homographies = homographies[::-1]
-    for image, homography in zip(images, homographies):
+    for image, homography in tqdm(zip(images, homographies), total=len(images), desc='Stitching...'):
         homography = homography.reshape(3, 3)
         # 移動先から元画像の画素を取ってくるため、逆行列と移動先の最小最大を計算
         inv_homography = np.linalg.inv(homography)

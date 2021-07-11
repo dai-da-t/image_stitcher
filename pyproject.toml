@@ -10,6 +10,7 @@ opencv-contrib-python = "^4.5.2"
 numpy = "^1.21.0"
 matplotlib = "^3.4.2"
 Pillow = "^8.3.1"
+tqdm = "^4.61.2"
 
 [tool.poetry.dev-dependencies]
 black = "^21.6b0"
