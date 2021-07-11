@@ -4,6 +4,8 @@ from typing import Dict, List, Optional, Tuple, Union
 import cv2
 import numpy as np
 
+from homography import calc_image_size, composite_homographies
+
 
 def load_images(image_paths: List[str]) -> List[np.ndarray]:
     images = []
@@ -98,11 +100,41 @@ def calc_homography(keypoints: List[cv2.KeyPoint], matches: List[Dict[Tuple[int,
     return homographies
 
 
+def stitch_images(images: List[np.ndarray], homographies: np.ndarray, empty_image: np.ndarray, shift: Tuple[int, int], base:int = 0):
+    height, width, _ = empty_image.shape
+
+    base_image = images[base]
+    base_height, base_width, _ = base_image.shape
+    stitched_image = empty_image.copy()
+
+    stitched_image[shift[1]:base_height + shift[1], shift[0]:base_width + shift[0]] = base_image
+
+    for image, homography in zip(images[:base] + images[base+1:], homographies):
+        homography = homography.reshape(3, 3)
+        for y in range(image.shape[0]):
+            for x in range(image.shape[1]):
+                destination = homography @ [x, y, 1]
+                destination = destination[:-1].astype(np.int64) + shift
+
+                stitched_image[destination[1], destination[0], :] = image[y, x, :]
+
+    return stitched_image.clip(0, 255).astype(np.uint8)
+
+
 def main(args: argparse.Namespace) -> None:
     images = load_images(args.images)
     keypoints, descriptors = detect_keypoints(images)
     matches = match_all_images(descriptors, args.distance_threthold, args.ratio_threthold, args.cross_check)
     homographies = calc_homography(keypoints, matches)
+
+    composited_homographies = composite_homographies(homographies)
+    width, height, shift = calc_image_size(images, composited_homographies)
+    empty_image = np.zeros((height, width, 3))
+
+    stitched_image = stitch_images(images, composited_homographies, empty_image, shift)
+    cv2.imshow('img_stitched', stitched_image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':
