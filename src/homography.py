@@ -67,7 +67,7 @@ def calc_image_size(
 
     width = max_x - min_x
     height = max_y - min_y
-    shift = (-min_x, -min_y) # 初期値が0のため0か正になる
+    shift = (-min_x, -min_y)  # 初期値が0のため0か正になる
 
     return width, height, shift
 
