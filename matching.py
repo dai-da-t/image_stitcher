@@ -1,5 +1,5 @@
 import argparse
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple
 
 import cv2
 import numpy as np
