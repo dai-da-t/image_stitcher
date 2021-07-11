@@ -206,7 +206,7 @@ def stitch_images(
     empty_image: np.ndarray,
     shift: Tuple[int, int],
     base: int = 0,
-):
+) -> np.ndarray:
     """
     画像とホモグラフィーからStitchingを行う。
 
