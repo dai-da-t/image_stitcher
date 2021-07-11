@@ -114,9 +114,8 @@ def main(args: argparse.Namespace) -> None:
     empty_image = np.zeros((height, width, 3))
 
     stitched_image = stitch_images(images, composited_homographies, empty_image, shift)
-    cv2.imshow("img_stitched", stitched_image)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+
+    cv2.imwrite(args.output, stitched_image)
 
 
 if __name__ == "__main__":
@@ -124,6 +123,9 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "-i", "--images", help="input images", nargs="+", type=str, required=True
+    )
+    parser.add_argument(
+        "-o", "--output", help="path to output image", type=str, required=True
     )
 
     parser.add_argument(
