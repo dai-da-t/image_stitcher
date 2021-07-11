@@ -90,9 +90,11 @@ def stitch_images(
         for y in range(min_y, max_y):
             for x in range(min_x, max_x):
                 source_coord = inv_homography @ [x, y, 1]
-                source_x, source_y = source_coord[:-1].clip(0).astype(np.int64)
-                source_x = min(image.shape[1] - 1, source_x)
-                source_y = min(image.shape[0] - 1, source_y)
+                source_x, source_y = (source_coord[:-1] / source_coord[2]).astype(np.int64)
+
+                if (source_x <= 0 or image.shape[1] <= source_x
+                    or source_y <= 0 or image.shape[0] <= source_y):
+                    continue
 
                 stitched_image[y + shift[1], x + shift[0], :] = image[
                     source_y, source_x, :
