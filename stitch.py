@@ -4,7 +4,12 @@ from typing import List, Optional, Tuple
 import cv2
 import numpy as np
 
-from src.homography import calc_image_size, calc_min_max_coordinate, composite_homographies, calc_homography
+from src.homography import (
+    calc_homography,
+    calc_image_size,
+    calc_min_max_coordinate,
+    composite_homographies,
+)
 from src.match import match_all_images
 
 

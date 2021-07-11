@@ -1,5 +1,6 @@
 from typing import List, Tuple
 
+import cv2
 import numpy as np
 
 
@@ -65,6 +66,7 @@ def composite_homographies(homographies: np.ndarray) -> np.ndarray:
         )
 
     return composited_homographies
+
 
 def calc_homography(
     keypoints: List[cv2.KeyPoint], matches: List[Dict[Tuple[int, int], float]]

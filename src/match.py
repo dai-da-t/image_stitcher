@@ -1,6 +1,7 @@
+from typing import Dict, List, Tuple
+
 import numpy as np
 
-from typing import Tuple, List, Dict
 
 def match_keypoints(
     descriptors1: np.ndarray,
