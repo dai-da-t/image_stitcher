@@ -70,16 +70,13 @@ def stitch_images(
     Returns:
         stitched_image (ndarray): Stitchingを行った画像
     """
-    base_image = images[base]
+    base_image = images.pop(base)
     base_height, base_width, _ = base_image.shape
     stitched_image = empty_image.copy()
 
-    # shiftだけ移動させてbase画像をコピー
-    stitched_image[
-        shift[1] : base_height + shift[1], shift[0] : base_width + shift[0]
-    ] = base_image
-
-    for image, homography in zip(images[:base] + images[base + 1 :], homographies):
+    images = images[::-1]
+    homographies = homographies[::-1]
+    for image, homography in zip(images, homographies):
         homography = homography.reshape(3, 3)
         # 移動先から元画像の画素を取ってくるため、逆行列と移動先の最小最大を計算
         inv_homography = np.linalg.inv(homography)
@@ -89,11 +86,17 @@ def stitch_images(
             for x in range(min_x, max_x):
                 source_coord = inv_homography @ [x, y, 1]
                 source_x, source_y = source_coord[:-1].clip(0).astype(np.int64)
-                assert 0 <= source_x and 0 <= source_y
+                source_x = min(image.shape[1] - 1, source_x)
+                source_y = min(image.shape[0] - 1, source_y)
 
-                stitched_image[y + shift[1], x + shift[0]] = image[
+                stitched_image[y + shift[1], x + shift[0], :] = image[
                     source_y, source_x, :
                 ]
+
+    # shiftだけ移動させてbase画像をコピー
+    stitched_image[
+        shift[1] : base_height + shift[1], shift[0] : base_width + shift[0]
+    ] = base_image
 
     return stitched_image.clip(0, 255).astype(np.uint8)
 
