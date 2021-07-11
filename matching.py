@@ -4,7 +4,7 @@ from typing import Dict, List, Optional, Tuple, Union
 import cv2
 import numpy as np
 
-from homography import calc_image_size, composite_homographies
+from homography import calc_image_size, calc_min_max_coordinate, composite_homographies
 
 
 def load_images(image_paths: List[str]) -> List[np.ndarray]:
@@ -101,8 +101,6 @@ def calc_homography(keypoints: List[cv2.KeyPoint], matches: List[Dict[Tuple[int,
 
 
 def stitch_images(images: List[np.ndarray], homographies: np.ndarray, empty_image: np.ndarray, shift: Tuple[int, int], base:int = 0):
-    height, width, _ = empty_image.shape
-
     base_image = images[base]
     base_height, base_width, _ = base_image.shape
     stitched_image = empty_image.copy()
@@ -111,12 +109,16 @@ def stitch_images(images: List[np.ndarray], homographies: np.ndarray, empty_imag
 
     for image, homography in zip(images[:base] + images[base+1:], homographies):
         homography = homography.reshape(3, 3)
-        for y in range(image.shape[0]):
-            for x in range(image.shape[1]):
-                destination = homography @ [x, y, 1]
-                destination = destination[:-1].astype(np.int64) + shift
+        inv_homography = np.linalg.inv(homography)
+        min_x, min_y, max_x, max_y = calc_min_max_coordinate(image, homography)
 
-                stitched_image[destination[1], destination[0], :] = image[y, x, :]
+        for y in range(min_y, max_y):
+            for x in range(min_x, max_x):
+                source_coord = inv_homography @ [x, y, 1]
+                source_x, source_y = source_coord[:-1].clip(0).astype(np.int64)
+                assert 0 <= source_x and 0 <= source_y
+
+                stitched_image[y + shift[1], x + shift[0]] = image[source_y, source_x, :]
 
     return stitched_image.clip(0, 255).astype(np.uint8)
 
