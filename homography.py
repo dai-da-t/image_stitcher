@@ -65,3 +65,65 @@ def composite_homographies(homographies: np.ndarray) -> np.ndarray:
         )
 
     return composited_homographies
+
+def calc_homography(
+    keypoints: List[cv2.KeyPoint], matches: List[Dict[Tuple[int, int], float]]
+) -> np.ndarray:
+    """
+    マッチングから特徴点の座標ペアを作成し、ホモグラフィーを計算
+
+    Args:
+        keypoints (List[List[KeyPoint]]): 各画像のKeyPoint集合
+        matches (List[Dict]): 各画像のマッチング集合
+
+    Returns:
+        homographies (ndarray): 各画像のホモグラフィー集合
+                                shape: (画像数, 9)
+    """
+    homographies = np.empty((0, 9))
+
+    for i, match in enumerate(matches):
+        # Ah = bの方程式を作成
+        # A : coefficient, b: destination
+        coefficient = np.empty((0, 8))
+        destination = np.empty((0))
+
+        for source_index, destination_index in match:
+            source_keypoint = keypoints[i + 1][source_index]
+            destination_keypoint = keypoints[i][destination_index]
+
+            destination = np.hstack((destination, destination_keypoint.pt))
+            source_x, source_y = source_keypoint.pt
+            destination_x, destination_y = destination_keypoint.pt
+            coefficient_tmp = np.array(
+                [
+                    [
+                        source_x,
+                        source_y,
+                        1,
+                        0,
+                        0,
+                        0,
+                        -source_x * destination_x,
+                        -source_y * destination_x,
+                    ],
+                    [
+                        0,
+                        0,
+                        0,
+                        source_x,
+                        source_y,
+                        1,
+                        -source_x * destination_y,
+                        -source_y * destination_y,
+                    ],
+                ]
+            )
+            coefficient = np.vstack((coefficient, coefficient_tmp))
+
+        # 一般逆行列を用いてホモグラフィーを計算
+        homography = np.linalg.pinv(coefficient) @ destination
+        homography = np.hstack((homography, 1))
+        homographies = np.vstack((homographies, homography))
+
+    return homographies
