@@ -27,23 +27,28 @@ def load_images(image_paths: List[str]) -> List[np.ndarray]:
 
 def detect_keypoints(
     images: List[np.ndarray],
+    algorithm: str,
 ) -> Tuple[List[List[cv2.KeyPoint]], List[np.ndarray]]:
     """
-    AKAZEを用いた特徴点検出
+    特徴点検出器による全画像の特徴点検出
 
     Args:
         images (List[ndarray]): 画像の集合
+        algorithm (str): 検出器の種類、SIFT or AKAZE
 
     Returns:
         keypoints (List[List[KeyPoint]]): 各画像のKeyPoint集合
         descriptors (List[np.ndarray]): 各画像の記述子集合
     """
-    akaze = cv2.AKAZE_create()
+    if algorithm == 'SIFT':
+        detector = cv2.SIFT_create()
+    else:
+        detector = cv2.AKAZE_create()
     keypoints: List[List[cv2.KeyPoint]] = []
     descriptors: List[np.ndarray] = []
 
     for image in images:
-        keypoint, descriptor = akaze.detectAndCompute(image, mask=None)
+        keypoint, descriptor = detector.detectAndCompute(image, mask=None)
         keypoints.append(keypoint)
         descriptors.append(descriptor)
 
@@ -103,7 +108,7 @@ def stitch_images(
 
 def main(args: argparse.Namespace) -> None:
     images = load_images(args.images)
-    keypoints, descriptors = detect_keypoints(images)
+    keypoints, descriptors = detect_keypoints(images, args.algorithm)
     matches = match_all_images(
         descriptors, args.distance_threthold, args.ratio_threthold, args.cross_check
     )
@@ -142,6 +147,7 @@ if __name__ == "__main__":
         type=float,
         default=0.8,
     )
+    parser.add_argument("-a", "--algorithm", help = 'detector algorithm', type=str, default='AKAZE', choices=['AKAZE', 'SIFT'])
     parser.add_argument("-c", "--cross_check", action="store_true")
 
     args = parser.parse_args()
