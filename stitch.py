@@ -41,7 +41,7 @@ def detect_keypoints(
         keypoints (List[List[KeyPoint]]): 各画像のKeyPoint集合
         descriptors (List[np.ndarray]): 各画像の記述子集合
     """
-    if algorithm == 'SIFT':
+    if algorithm == "SIFT":
         detector = cv2.SIFT_create()
     else:
         detector = cv2.AKAZE_create()
@@ -82,7 +82,9 @@ def stitch_images(
 
     images = images[::-1]
     homographies = homographies[::-1]
-    for image, homography in tqdm(zip(images, homographies), total=len(images), desc='Stitching...'):
+    for image, homography in tqdm(
+        zip(images, homographies), total=len(images), desc="Stitching..."
+    ):
         homography = homography.reshape(3, 3)
         # 移動先から元画像の画素を取ってくるため、逆行列と移動先の最小最大を計算
         inv_homography = np.linalg.inv(homography)
@@ -91,10 +93,16 @@ def stitch_images(
         for y in range(min_y, max_y):
             for x in range(min_x, max_x):
                 source_coord = inv_homography @ [x, y, 1]
-                source_x, source_y = (source_coord[:-1] / source_coord[2]).astype(np.int64)
+                source_x, source_y = (source_coord[:-1] / source_coord[2]).astype(
+                    np.int64
+                )
 
-                if (source_x <= 0 or image.shape[1] <= source_x
-                    or source_y <= 0 or image.shape[0] <= source_y):
+                if (
+                    source_x <= 0
+                    or image.shape[1] <= source_x
+                    or source_y <= 0
+                    or image.shape[0] <= source_y
+                ):
                     continue
 
                 stitched_image[y + shift[1], x + shift[0], :] = image[
@@ -150,7 +158,14 @@ if __name__ == "__main__":
         type=float,
         default=0.8,
     )
-    parser.add_argument("-a", "--algorithm", help = 'detector algorithm', type=str, default='AKAZE', choices=['AKAZE', 'SIFT'])
+    parser.add_argument(
+        "-a",
+        "--algorithm",
+        help="detector algorithm",
+        type=str,
+        default="AKAZE",
+        choices=["AKAZE", "SIFT"],
+    )
     parser.add_argument("-c", "--cross_check", action="store_true")
 
     args = parser.parse_args()

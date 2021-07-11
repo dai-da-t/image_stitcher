@@ -3,6 +3,7 @@ from typing import Dict, List, Tuple
 import numpy as np
 from tqdm import tqdm
 
+
 def match_keypoints(
     descriptors1: np.ndarray,
     descriptors2: np.ndarray,
@@ -71,7 +72,7 @@ def match_all_images(
     """
     all_matches: List[Dict[Tuple[int, int], float]] = []
 
-    for i, descriptor in enumerate(tqdm(descriptors, desc='Matching...')):
+    for i, descriptor in enumerate(tqdm(descriptors, desc="Matching...")):
         # 最初は計算しない
         if i == 0:
             continue
@@ -92,6 +93,6 @@ def match_all_images(
 
             matches = tmp_matches
 
-        assert 4 <= len(matches), 'The number of matches is too small.'
+        assert 4 <= len(matches), "The number of matches is too small."
         all_matches.append(matches)
     return all_matches
