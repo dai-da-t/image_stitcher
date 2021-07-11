@@ -23,14 +23,14 @@ def detect_keypoints(
 ) -> Tuple[List[List[cv2.KeyPoint]], List[np.ndarray]]:
     akaze = cv2.AKAZE_create()
     keypoints: List[List[cv2.KeyPoint]] = []
-    desctiptors: List[np.ndarray] = []
+    descriptors: List[np.ndarray] = []
 
     for image in images:
-        keypoint, desctiptor = akaze.detectAndCompute(image, mask=None)
+        keypoint, descriptor = akaze.detectAndCompute(image, mask=None)
         keypoints.append(keypoint)
-        desctiptors.append(desctiptor)
+        descriptors.append(descriptor)
 
-    return keypoints, desctiptors
+    return keypoints, descriptors
 
 
 def match_keypoints(
