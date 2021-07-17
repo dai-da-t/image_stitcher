@@ -49,7 +49,8 @@ def detect_keypoints(
     descriptors: List[np.ndarray] = []
 
     for image in images:
-        keypoint, descriptor = detector.detectAndCompute(image, mask=None)
+        image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        keypoint, descriptor = detector.detectAndCompute(image_gray, mask=None)
         keypoints.append(keypoint)
         descriptors.append(descriptor)
 
@@ -98,9 +99,9 @@ def stitch_images(
                 )
 
                 if (
-                    source_x <= 0
+                    source_x < 0
                     or image.shape[1] <= source_x
-                    or source_y <= 0
+                    or source_y < 0
                     or image.shape[0] <= source_y
                 ):
                     continue
