@@ -25,8 +25,8 @@ def calc_min_max_coordinate(
     corners = np.array([[0, 0, 1], [0, height, 1], [weight, 0, 1], [weight, height, 1]])
     for corner in corners:
         warped_corner = homography.reshape(3, 3) @ corner
-        x = warped_corner[0]
-        y = warped_corner[1]
+        x = warped_corner[0] / warped_corner[2]
+        y = warped_corner[1] / warped_corner[2]
 
         min_x = min(x, min_x)
         min_y = min(y, min_y)
@@ -34,7 +34,8 @@ def calc_min_max_coordinate(
         max_y = max(y, max_y)
 
     min_x, min_y, max_x, max_y = map(int, (min_x, min_y, max_x, max_y))
-    return min_x, min_y, max_x, max_y
+    # 小数点以下の誤差を考慮
+    return min_x - 1, min_y - 1, max_x + 1, max_y + 1
 
 
 def calc_image_size(
